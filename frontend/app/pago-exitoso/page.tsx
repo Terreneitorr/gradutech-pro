@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
-export default function PagoExitoso() {
+function PagoExitosoContenido() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [procesando, setProcesando] = useState(true);
@@ -11,7 +11,20 @@ export default function PagoExitoso() {
   const pedidoId = searchParams.get('pedido');
 
   useEffect(() => {
-    setTimeout(() => setProcesando(false), 2000);
+    const confirmarPago = async () => {
+      const token = localStorage.getItem('token');
+      if (tipo === 'anticipo' && pedidoId && token) {
+        try {
+          await axios.put(`http://localhost:3000/api/pedidos/${pedidoId}/anticipo`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      setTimeout(() => setProcesando(false), 1500);
+    };
+    confirmarPago();
   }, []);
 
   return (
@@ -79,5 +92,17 @@ export default function PagoExitoso() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function PagoExitoso() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center" style={{background:'#0f0c29'}}>
+        <div className="text-white">Cargando...</div>
+      </main>
+    }>
+      <PagoExitosoContenido />
+    </Suspense>
   );
 }
