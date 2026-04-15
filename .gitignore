@@ -1,0 +1,6 @@
+﻿node_modules/
+.env
+backend/uploads/modelos/*
+!backend/uploads/modelos/.gitkeep
+frontend/.next/
+frontend/node_modules/
