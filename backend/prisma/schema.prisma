@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       Rol      @default(USUARIO)
+  createdAt DateTime @default(now())
+  pedidos   Pedido[]
+}
+
+model Agencia {
+  id          String            @id @default(uuid())
+  nombre      String
+  slug        String            @unique
+  descripcion String?
+  logo        String?
+  activa      Boolean           @default(false)
+  suscripcion Boolean           @default(false)
+  usuarioId   String?
+  createdAt   DateTime          @default(now())
+  paquetes    Paquete[]
+  pedidos     Pedido[]
+  fechas      FechaDisponible[]
+  modelos     ModeloCuadro[]
+}
+
+model Paquete {
+  id          String   @id @default(uuid())
+  nombre      String
+  descripcion String?
+  precio      Float
+  agenciaId   String
+  agencia     Agencia  @relation(fields: [agenciaId], references: [id])
+  pedidos     Pedido[]
+}
+
+model Pedido {
+  id             String       @id @default(uuid())
+  usuarioId      String
+  agenciaId      String
+  paqueteId      String
+  escuela        String
+  grado          String
+  leyenda        String
+  estado         EstadoPedido @default(PENDIENTE)
+  totalPago      Float
+  anticipoPagado Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  agencia        Agencia      @relation(fields: [agenciaId], references: [id])
+  paquete        Paquete      @relation(fields: [paqueteId], references: [id])
+}
+
+model FechaDisponible {
+  id        String   @id @default(uuid())
+  agenciaId String
+  fecha     DateTime
+  cupos     Int
+  agencia   Agencia  @relation(fields: [agenciaId], references: [id])
+}
+
+model Publicidad {
+  id        String   @id @default(uuid())
+  empresa   String
+  imagen    String?
+  link      String?
+  activa    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ModeloCuadro {
+  id          String   @id @default(uuid())
+  agenciaId   String
+  nombre      String
+  tipo        TipoCuadro
+  imagen      String
+  createdAt   DateTime @default(now())
+  agencia     Agencia  @relation(fields: [agenciaId], references: [id])
+}
+
+enum Rol {
+  USUARIO
+  AGENCIA
+  ADMIN
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  EN_PRODUCCION
+  LISTO
+  ENTREGADO
+}
+
+enum TipoCuadro {
+  MARCO
+  FONDO
+  DISENO
+}
