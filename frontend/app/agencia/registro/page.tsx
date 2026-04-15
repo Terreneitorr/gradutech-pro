@@ -61,7 +61,7 @@ export default function RegistroAgencia() {
   setCargando(true);
   setError('');
   try {
-    const res = await axios.post('http://localhost:3000/api/auth/registro', {
+    const res = await axios.post('https://darksiders.shop/api/auth/registro', {
       nombre: form.nombre,
       email: form.email,
       password: form.password,
@@ -69,13 +69,13 @@ export default function RegistroAgencia() {
     });
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
-    await axios.post('http://localhost:3000/api/agencias', {
+    await axios.post('https://darksiders.shop/api/agencias', {
       nombre: form.nombre,
       descripcion: form.descripcion,
     }, { headers: { Authorization: `Bearer ${res.data.token}` } });
     const planes = ['basico', 'pro', 'anual'];
     const plan = planes[planSeleccionado];
-    const resPago = await axios.post('http://localhost:3000/api/pagos/suscripcion',
+    const resPago = await axios.post('https://darksiders.shop/api/pagos/suscripcion',
       { plan },
       { headers: { Authorization: `Bearer ${res.data.token}` } });
     window.location.href = resPago.data.url;

@@ -15,7 +15,7 @@ function PagoExitosoContenido() {
       const token = localStorage.getItem('token');
       if (tipo === 'anticipo' && pedidoId && token) {
         try {
-          await axios.put(`http://localhost:3000/api/pedidos/${pedidoId}/anticipo`,
+          await axios.put(`https://darksiders.shop/api/pedidos/${pedidoId}/anticipo`,
             {},
             { headers: { Authorization: `Bearer ${token}` } });
         } catch (err) {

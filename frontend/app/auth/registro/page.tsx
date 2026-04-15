@@ -18,7 +18,7 @@ export default function Registro() {
     setCargando(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3000/api/auth/registro', {
+      const res = await axios.post('https://darksiders.shop/api/auth/registro', {
         nombre: form.nombre,
         email: form.email,
         password: form.password,

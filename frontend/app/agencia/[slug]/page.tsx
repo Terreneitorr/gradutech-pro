@@ -26,7 +26,7 @@ export default function PerfilAgencia() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/agencias/${slug}`)
+    axios.get(`https://darksiders.shop/api/agencias/${slug}`)
       .then(res => { setAgencia(res.data); setCargando(false); })
       .catch(() => setCargando(false));
   }, [slug]);

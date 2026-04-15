@@ -25,7 +25,7 @@ export default function Configurador() {
   const idAgencia = Array.isArray(agenciaId) ? agenciaId[0] : String(agenciaId);
   const idPaquete = Array.isArray(paqueteId) ? paqueteId[0] : String(paqueteId);
   
-  axios.get(`http://localhost:3000/api/agencias/id/${idAgencia}`)
+  axios.get(`https://darksiders.shop/api/agencias/id/${idAgencia}`)
     .then(res => {
       setAgencia(res.data);
       const p = res.data.paquetes.find((pak: any) => pak.id === idPaquete);
@@ -46,7 +46,7 @@ export default function Configurador() {
     try {
       const token = localStorage.getItem('token');
       if (!token) { router.push('/auth/login'); return; }
-      await axios.post('http://localhost:3000/api/pedidos', {
+      await axios.post('https://darksiders.shop/api/pedidos', {
         agenciaId,
         paqueteId,
         escuela: form.escuela,

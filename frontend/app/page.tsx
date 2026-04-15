@@ -15,7 +15,7 @@ export default function Home() {
   const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3000/api/agencias')
+    axios.get('https://darksiders.shop/api/agencias')
       .then(res => setAgencias(res.data))
       .catch(err => console.error(err));
   }, []);

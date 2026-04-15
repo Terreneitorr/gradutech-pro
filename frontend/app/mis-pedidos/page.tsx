@@ -14,7 +14,7 @@ export default function MisPedidos() {
     const u = JSON.parse(localStorage.getItem('usuario') || '{}');
     if (!token) { router.push('/auth/login'); return; }
     setUsuario(u);
-    axios.get('http://localhost:3000/api/pedidos/mis-pedidos',
+    axios.get('https://darksiders.shop/api/pedidos/mis-pedidos',
       { headers: { Authorization: `Bearer ${token}` } })
       .then(res => { setPedidos(res.data); setCargando(false); })
       .catch(() => { router.push('/auth/login'); });
@@ -164,7 +164,7 @@ export default function MisPedidos() {
                         onClick={async () => {
                           const token = localStorage.getItem('token');
                           try {
-                            const res = await axios.post('http://localhost:3000/api/pagos/anticipo',
+                            const res = await axios.post('https://darksiders.shop/api/pagos/anticipo',
                               { pedidoId: pedido.id },
                               { headers: { Authorization: `Bearer ${token}` } });
                             window.location.href = res.data.url;

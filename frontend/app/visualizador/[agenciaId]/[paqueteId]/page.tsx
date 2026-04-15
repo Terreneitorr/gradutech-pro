@@ -23,12 +23,12 @@ export default function Visualizador() {
   useEffect(() => {
     const idAgencia = Array.isArray(agenciaId) ? agenciaId[0] : String(agenciaId);
     const idPaquete = Array.isArray(paqueteId) ? paqueteId[0] : String(paqueteId);
-    axios.get(`http://localhost:3000/api/agencias/id/${idAgencia}`)
+    axios.get(`https://darksiders.shop/api/agencias/id/${idAgencia}`)
       .then(res => {
         const p = res.data.paquetes.find((pk: any) => pk.id === idPaquete);
         setPaquete(p || res.data.paquetes[0]);
       });
-    axios.get(`http://localhost:3000/api/modelos/agencia/${idAgencia}`)
+    axios.get(`https://darksiders.shop/api/modelos/agencia/${idAgencia}`)
       .then(res => setModelos(res.data));
   }, [agenciaId, paqueteId]);
 
@@ -48,7 +48,7 @@ export default function Visualizador() {
       if (seleccion.fondo) {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = `http://localhost:3000${seleccion.fondo.imagen}`;
+        img.src = `https://darksiders.shop${seleccion.fondo.imagen}`;
         await new Promise(r => { img.onload = r; img.onerror = r; });
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       } else {
@@ -60,7 +60,7 @@ export default function Visualizador() {
       if (seleccion.diseno) {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = `http://localhost:3000${seleccion.diseno.imagen}`;
+        img.src = `https://darksiders.shop${seleccion.diseno.imagen}`;
         await new Promise(r => { img.onload = r; img.onerror = r; });
         ctx.drawImage(img, 20, 20, canvas.width - 40, canvas.height - 40);
       }
@@ -95,7 +95,7 @@ export default function Visualizador() {
       if (seleccion.marco) {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = `http://localhost:3000${seleccion.marco.imagen}`;
+        img.src = `https://darksiders.shop${seleccion.marco.imagen}`;
         await new Promise(r => { img.onload = r; img.onerror = r; });
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       } else {
@@ -216,7 +216,7 @@ export default function Visualizador() {
                       border: seleccionado ? '2px solid #f093fb' : '1px solid rgba(255,255,255,0.1)',
                       transform: seleccionado ? 'scale(1.03)' : 'scale(1)'
                     }}>
-                    <img src={`http://localhost:3000${m.imagen}`} alt={m.nombre} className="w-full object-cover" style={{height:70}}/>
+                    <img src={`https://darksiders.shop${m.imagen}`} alt={m.nombre} className="w-full object-cover" style={{height:70}}/>
                     <div className="px-2 py-1" style={{background:'rgba(0,0,0,0.5)'}}>
                       <p className="text-white text-xs font-medium truncate">{m.nombre}</p>
                     </div>

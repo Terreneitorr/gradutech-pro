@@ -11,7 +11,7 @@ function NuevoPaquete({ agenciaId, onCreado }: any) {
     setCargando(true);
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.post(`http://localhost:3000/api/agencias/${agenciaId}/paquetes`, form,
+      const res = await axios.post(`https://darksiders.shop/api/agencias/${agenciaId}/paquetes`, form,
         { headers: { Authorization: `Bearer ${token}` } });
       onCreado(res.data);
       setForm({ nombre: '', descripcion: '', precio: '' });
@@ -53,7 +53,7 @@ function NuevaFecha({ agenciaId, onCreada }: any) {
     setCargando(true);
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.post(`http://localhost:3000/api/agencias/${agenciaId}/fechas`, form,
+      const res = await axios.post(`https://darksiders.shop/api/agencias/${agenciaId}/fechas`, form,
         { headers: { Authorization: `Bearer ${token}` } });
       onCreada(res.data);
       setForm({ fecha: '', cupos: '' });
@@ -105,7 +105,7 @@ function SubirModelo({ agenciaId, onSubido }: any) {
       formData.append('agenciaId', agenciaId);
       formData.append('nombre', form.nombre);
       formData.append('tipo', form.tipo);
-      const res = await axios.post('http://localhost:3000/api/modelos/subir', formData,
+      const res = await axios.post('https://darksiders.shop/api/modelos/subir', formData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
       onSubido(res.data);
       setForm({ nombre: '', tipo: 'MARCO' });
@@ -167,14 +167,14 @@ export default function Dashboard() {
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const token = localStorage.getItem('token');
     if (!token || usuario.rol !== 'AGENCIA') { router.push('/auth/login'); return; }
-    axios.get('http://localhost:3000/api/agencias/todas', { headers: { Authorization: `Bearer ${token}` } })
+    axios.get('https://darksiders.shop/api/agencias/todas', { headers: { Authorization: `Bearer ${token}` } })
       .then(res => {
         const miAgencia = res.data.find((a: any) => a.usuarioId === usuario.id);
         if (miAgencia) {
           setAgencia(miAgencia);
-          axios.get(`http://localhost:3000/api/modelos/agencia/${miAgencia.id}`)
+          axios.get(`https://darksiders.shop/api/modelos/agencia/${miAgencia.id}`)
             .then(r => setModelos(r.data));
-          return axios.get(`http://localhost:3000/api/pedidos/agencia/${miAgencia.id}`,
+          return axios.get(`https://darksiders.shop/api/pedidos/agencia/${miAgencia.id}`,
             { headers: { Authorization: `Bearer ${token}` } });
         } else { setCargando(false); }
       })
@@ -198,7 +198,7 @@ export default function Dashboard() {
   const cambiarEstado = async (pedidoId: string, estado: string) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:3000/api/pedidos/${pedidoId}/estado`, { estado },
+      await axios.put(`https://darksiders.shop/api/pedidos/${pedidoId}/estado`, { estado },
         { headers: { Authorization: `Bearer ${token}` } });
       setPedidos(prev => prev.map(p => p.id === pedidoId ? {...p, estado} : p));
     } catch (err) { console.error(err); }
@@ -355,7 +355,7 @@ export default function Dashboard() {
                   </div>
                   <button onClick={async () => {
                     const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:3000/api/agencias/paquetes/${p.id}`, { headers: { Authorization: `Bearer ${token}` } });
+                    await axios.delete(`https://darksiders.shop/api/agencias/paquetes/${p.id}`, { headers: { Authorization: `Bearer ${token}` } });
                     setAgencia((prev: any) => ({...prev, paquetes: prev.paquetes.filter((pk: any) => pk.id !== p.id)}));
                   }}
                     className="px-3 py-1 rounded-lg text-xs"
@@ -386,7 +386,7 @@ export default function Dashboard() {
                   </div>
                   <button onClick={async () => {
                     const token = localStorage.getItem('token');
-                    await axios.delete(`http://localhost:3000/api/agencias/fechas/${f.id}`, { headers: { Authorization: `Bearer ${token}` } });
+                    await axios.delete(`https://darksiders.shop/api/agencias/fechas/${f.id}`, { headers: { Authorization: `Bearer ${token}` } });
                     setAgencia((prev: any) => ({...prev, fechas: prev.fechas.filter((fe: any) => fe.id !== f.id)}));
                   }}
                     className="px-3 py-1 rounded-lg text-xs"
@@ -413,14 +413,14 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {modelos.map((m: any) => (
                     <div key={m.id} className="rounded-2xl overflow-hidden" style={{background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)'}}>
-                      <img src={`http://localhost:3000${m.imagen}`} alt={m.nombre} className="w-full object-cover" style={{height:140}}/>
+                      <img src={`https://darksiders.shop${m.imagen}`} alt={m.nombre} className="w-full object-cover" style={{height:140}}/>
                       <div className="p-3">
                         <p className="text-white text-sm font-medium">{m.nombre}</p>
                         <div className="flex justify-between items-center mt-2">
                           <span className="text-xs px-2 py-0.5 rounded-full" style={{background:'rgba(240,147,251,0.2)', color:'#f093fb'}}>{m.tipo}</span>
                           <button onClick={async () => {
                             const token = localStorage.getItem('token');
-                            await axios.delete(`http://localhost:3000/api/modelos/${m.id}`, { headers: { Authorization: `Bearer ${token}` } });
+                            await axios.delete(`https://darksiders.shop/api/modelos/${m.id}`, { headers: { Authorization: `Bearer ${token}` } });
                             setModelos(prev => prev.filter((mo: any) => mo.id !== m.id));
                           }}
                             className="text-xs px-2 py-0.5 rounded-lg"
