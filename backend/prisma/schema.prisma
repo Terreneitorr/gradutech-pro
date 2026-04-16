@@ -7,6 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Modelo Usuario: Representa a los usuarios del sistema, incluyendo clientes y administradores de agencias.
+// Sirve para gestionar la autenticación y autorización de usuarios en la plataforma.
+// Relaciones: Tiene una relación uno a muchos con Pedido (un usuario puede tener múltiples pedidos).
 model Usuario {
   id        String   @id @default(uuid())
   nombre    String
@@ -17,6 +20,9 @@ model Usuario {
   pedidos   Pedido[]
 }
 
+// Modelo Agencia: Representa a las agencias fotográficas que ofrecen servicios de producción de cuadros escolares.
+// Sirve para organizar y gestionar las agencias registradas en el sistema, incluyendo su configuración y productos.
+// Relaciones: Tiene una relación uno a muchos con Paquete, Pedido, FechaDisponible y ModeloCuadro (una agencia puede tener múltiples paquetes, pedidos, fechas disponibles y modelos de cuadros).
 model Agencia {
   id          String            @id @default(uuid())
   nombre      String
@@ -33,6 +39,9 @@ model Agencia {
   modelos     ModeloCuadro[]
 }
 
+// Modelo Paquete: Representa los paquetes de productos ofrecidos por las agencias, como diferentes tipos de cuadros escolares.
+// Sirve para definir los productos disponibles para la venta, incluyendo nombre, descripción y precio.
+// Relaciones: Pertenece a una Agencia (muchos a uno) y tiene una relación uno a muchos con Pedido (un paquete puede estar en múltiples pedidos).
 model Paquete {
   id          String   @id @default(uuid())
   nombre      String
@@ -43,6 +52,9 @@ model Paquete {
   pedidos     Pedido[]
 }
 
+// Modelo Pedido: Representa los pedidos realizados por los usuarios para adquirir productos de las agencias.
+// Sirve para gestionar el proceso de compra, desde la solicitud hasta la entrega, incluyendo estado y pagos.
+// Relaciones: Pertenece a un Usuario (muchos a uno), una Agencia (muchos a uno) y un Paquete (muchos a uno).
 model Pedido {
   id             String       @id @default(uuid())
   usuarioId      String
@@ -60,6 +72,9 @@ model Pedido {
   paquete        Paquete      @relation(fields: [paqueteId], references: [id])
 }
 
+// Modelo FechaDisponible: Representa las fechas disponibles para sesiones fotográficas o entregas por parte de las agencias.
+// Sirve para gestionar la disponibilidad de horarios y cupos para servicios ofrecidos por las agencias.
+// Relaciones: Pertenece a una Agencia (muchos a uno).
 model FechaDisponible {
   id        String   @id @default(uuid())
   agenciaId String
@@ -68,6 +83,9 @@ model FechaDisponible {
   agencia   Agencia  @relation(fields: [agenciaId], references: [id])
 }
 
+// Modelo Publicidad: Representa los anuncios publicitarios de empresas externas en la plataforma.
+// Sirve para gestionar la publicidad mostrada en el sistema, incluyendo imágenes y enlaces.
+// Relaciones: No tiene relaciones directas con otras tablas; es independiente.
 model Publicidad {
   id        String   @id @default(uuid())
   empresa   String
@@ -77,6 +95,9 @@ model Publicidad {
   createdAt DateTime @default(now())
 }
 
+// Modelo ModeloCuadro: Representa los modelos o plantillas de cuadros disponibles para las agencias, como marcos, fondos y diseños.
+// Sirve para definir los elementos visuales que las agencias pueden usar en sus productos.
+// Relaciones: Pertenece a una Agencia (muchos a uno).
 model ModeloCuadro {
   id          String   @id @default(uuid())
   agenciaId   String
