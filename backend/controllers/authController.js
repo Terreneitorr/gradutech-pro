@@ -6,6 +6,24 @@ const prisma = new PrismaClient();
 const registro = async (req, res) => {
   try {
     const { nombre, email, password, rol } = req.body;
+
+    // Validaciones básicas
+    if (!nombre) {
+      return res.status(400).json({ error: "El nombre es obligatorio" });
+    }
+    if (!email) {
+      return res.status(400).json({ error: "El email es obligatorio" });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "El formato del email no es válido" });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+    if (rol && !['USUARIO', 'AGENCIA', 'ADMIN'].includes(rol)) {
+      return res.status(400).json({ error: "El rol debe ser USUARIO, AGENCIA o ADMIN" });
+    }
+
     const existe = await prisma.usuario.findUnique({ where: { email } });
     if (existe) return res.status(400).json({ error: 'Email ya registrado' });
     const hash = await bcrypt.hash(password, 10);
