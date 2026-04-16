@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
 
 export default function MisPedidos() {
@@ -14,8 +14,8 @@ export default function MisPedidos() {
     const u = JSON.parse(localStorage.getItem('usuario') || '{}');
     if (!token) { router.push('/auth/login'); return; }
     setUsuario(u);
-    axios.get('https://darksiders.shop/api/pedidos/mis-pedidos',
-      { headers: { Authorization: `Bearer ${token}` } })
+    // El cliente axios automáticamente incluye el token en headers
+    axiosClient.get('/pedidos/mis-pedidos')
       .then(res => { setPedidos(res.data); setCargando(false); })
       .catch(() => { router.push('/auth/login'); });
   }, []);
@@ -162,11 +162,10 @@ export default function MisPedidos() {
                     <div className="px-6 pb-4">
                       <button
                         onClick={async () => {
-                          const token = localStorage.getItem('token');
                           try {
-                            const res = await axios.post('https://darksiders.shop/api/pagos/anticipo',
-                              { pedidoId: pedido.id },
-                              { headers: { Authorization: `Bearer ${token}` } });
+                            // El cliente axios automáticamente incluye el token en headers
+                            const res = await axiosClient.post('/pagos/anticipo',
+                              { pedidoId: pedido.id });
                             window.location.href = res.data.url;
                           } catch (err) {
                             console.error(err);

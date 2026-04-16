@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 
 function PagoExitosoContenido() {
   const router = useRouter();
@@ -15,9 +15,8 @@ function PagoExitosoContenido() {
       const token = localStorage.getItem('token');
       if (tipo === 'anticipo' && pedidoId && token) {
         try {
-          await axios.put(`https://darksiders.shop/api/pedidos/${pedidoId}/anticipo`,
-            {},
-            { headers: { Authorization: `Bearer ${token}` } });
+          // El cliente axios automáticamente incluye el token en headers
+          await axiosClient.put(`/pedidos/${pedidoId}/anticipo`, {});
         } catch (err) {
           console.error(err);
         }

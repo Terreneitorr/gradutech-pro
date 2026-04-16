@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
 
 function NuevoPaquete({ agenciaId, onCreado }: any) {
@@ -9,10 +9,9 @@ function NuevoPaquete({ agenciaId, onCreado }: any) {
   const crear = async () => {
     if (!form.nombre || !form.precio) return;
     setCargando(true);
-    const token = localStorage.getItem('token');
     try {
-      const res = await axios.post(`https://darksiders.shop/api/agencias/${agenciaId}/paquetes`, form,
-        { headers: { Authorization: `Bearer ${token}` } });
+      // El cliente axios automáticamente incluye el token en headers
+      const res = await axiosClient.post(`/agencias/${agenciaId}/paquetes`, form);
       onCreado(res.data);
       setForm({ nombre: '', descripcion: '', precio: '' });
     } finally { setCargando(false); }
@@ -51,10 +50,9 @@ function NuevaFecha({ agenciaId, onCreada }: any) {
   const crear = async () => {
     if (!form.fecha || !form.cupos) return;
     setCargando(true);
-    const token = localStorage.getItem('token');
     try {
-      const res = await axios.post(`https://darksiders.shop/api/agencias/${agenciaId}/fechas`, form,
-        { headers: { Authorization: `Bearer ${token}` } });
+      // El cliente axios automáticamente incluye el token en headers
+      const res = await axiosClient.post(`/agencias/${agenciaId}/fechas`, form);
       onCreada(res.data);
       setForm({ fecha: '', cupos: '' });
     } finally { setCargando(false); }
@@ -98,15 +96,14 @@ function SubirModelo({ agenciaId, onSubido }: any) {
   const subir = async () => {
     if (!archivo || !form.nombre) return;
     setCargando(true);
-    const token = localStorage.getItem('token');
     try {
       const formData = new FormData();
       formData.append('imagen', archivo);
       formData.append('agenciaId', agenciaId);
       formData.append('nombre', form.nombre);
       formData.append('tipo', form.tipo);
-      const res = await axios.post('https://darksiders.shop/api/modelos/subir', formData,
-        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
+      // El cliente axios automáticamente incluye el token en headers
+      const res = await axiosClient.post('/modelos/subir', formData);
       onSubido(res.data);
       setForm({ nombre: '', tipo: 'MARCO' });
       setArchivo(null);
@@ -167,15 +164,15 @@ export default function Dashboard() {
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const token = localStorage.getItem('token');
     if (!token || usuario.rol !== 'AGENCIA') { router.push('/auth/login'); return; }
-    axios.get('https://darksiders.shop/api/agencias/todas', { headers: { Authorization: `Bearer ${token}` } })
+    // El cliente axios automáticamente incluye el token en headers
+    axiosClient.get('/agencias/todas')
       .then(res => {
         const miAgencia = res.data.find((a: any) => a.usuarioId === usuario.id);
         if (miAgencia) {
           setAgencia(miAgencia);
-          axios.get(`https://darksiders.shop/api/modelos/agencia/${miAgencia.id}`)
+          axiosClient.get(`/modelos/agencia/${miAgencia.id}`)
             .then(r => setModelos(r.data));
-          return axios.get(`https://darksiders.shop/api/pedidos/agencia/${miAgencia.id}`,
-            { headers: { Authorization: `Bearer ${token}` } });
+          return axiosClient.get(`/pedidos/agencia/${miAgencia.id}`);
         } else { setCargando(false); }
       })
       .then(res => { if (res) setPedidos(res.data.pedidos); setCargando(false); })
@@ -196,10 +193,9 @@ export default function Dashboard() {
   const ESTADOS = ['PENDIENTE','CONFIRMADO','EN_PRODUCCION','LISTO','ENTREGADO'];
 
   const cambiarEstado = async (pedidoId: string, estado: string) => {
-    const token = localStorage.getItem('token');
     try {
-      await axios.put(`https://darksiders.shop/api/pedidos/${pedidoId}/estado`, { estado },
-        { headers: { Authorization: `Bearer ${token}` } });
+      // El cliente axios automáticamente incluye el token en headers
+      await axiosClient.put(`/pedidos/${pedidoId}/estado`, { estado });
       setPedidos(prev => prev.map(p => p.id === pedidoId ? {...p, estado} : p));
     } catch (err) { console.error(err); }
   };

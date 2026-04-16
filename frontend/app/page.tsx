@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 
 interface Agencia {
   id: string;
@@ -15,7 +15,8 @@ export default function Home() {
   const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
-    axios.get('https://darksiders.shop/api/agencias')
+    // El cliente axios está configurado con baseURL y automáticamente incluye el token
+    axiosClient.get('/agencias')
       .then(res => setAgencias(res.data))
       .catch(err => console.error(err));
   }, []);

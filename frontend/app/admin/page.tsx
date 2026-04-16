@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
 
 export default function Admin() {
@@ -13,25 +13,23 @@ export default function Admin() {
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const token = localStorage.getItem('token');
     if (!token || usuario.rol !== 'ADMIN') { router.push('/'); return; }
-    axios.get('https://darksiders.shop/api/agencias/todas',
-      { headers: { Authorization: `Bearer ${token}` } })
+    // El cliente axios automáticamente incluye el token en headers
+    axiosClient.get('/agencias/todas')
       .then(res => { setAgencias(res.data); setCargando(false); })
       .catch(() => setCargando(false));
   }, []);
 
   const toggleAgencia = async (id: string, activa: boolean) => {
-    const token = localStorage.getItem('token');
-    await axios.put(`https://darksiders.shop/api/agencias/${id}`,
-      { activa: !activa },
-      { headers: { Authorization: `Bearer ${token}` } });
+    // El cliente axios automáticamente incluye el token en headers
+    await axiosClient.put(`/agencias/${id}`,
+      { activa: !activa });
     setAgencias(prev => prev.map(a => a.id === id ? {...a, activa: !activa} : a));
   };
 
   const toggleSuscripcion = async (id: string, suscripcion: boolean) => {
-    const token = localStorage.getItem('token');
-    await axios.put(`https://darksiders.shop/api/agencias/${id}`,
-      { suscripcion: !suscripcion },
-      { headers: { Authorization: `Bearer ${token}` } });
+    // El cliente axios automáticamente incluye el token en headers
+    await axiosClient.put(`/agencias/${id}`,
+      { suscripcion: !suscripcion });
     setAgencias(prev => prev.map(a => a.id === id ? {...a, suscripcion: !suscripcion} : a));
   };
 
