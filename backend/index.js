@@ -1,3 +1,16 @@
+/**
+ * Archivo principal del servidor Express
+ * -------------------------------------
+ * Inicializa la aplicación backend de GraduTech Pro.
+ * 
+ * Responsabilidades:
+ * - Configurar middlewares globales
+ * - Registrar rutas del sistema
+ * - Conectar con Prisma ORM
+ * - Iniciar servidor HTTP
+ * 
+ * Puerto por defecto: 3000
+ */
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
