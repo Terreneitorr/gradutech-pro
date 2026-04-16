@@ -36,6 +36,11 @@ app.get('/', (req, res) => {
   res.json({ mensaje: 'GraduTech Pro API funcionando' });
 });
 
+// Middleware global de manejo de errores
+// Debe ir al final de todas las rutas para capturar errores no manejados
+const errorHandler = require('./middlewares/errorHandler');
+app.use(errorHandler);
+
 app.listen(PORT, () => {
   console.log('Servidor corriendo en puerto ' + PORT);
 });
