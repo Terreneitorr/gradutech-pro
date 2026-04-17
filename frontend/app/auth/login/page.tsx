@@ -17,9 +17,9 @@ export default function Login() {
       const res = await axiosClient.post('/auth/login', form);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
-      const rol = res.data.usuario.rol;
+      const rol = res.data.usuario.rol?.toUpperCase();
       if (rol === 'ADMIN') router.push('/admin');
-      else if (rol === 'AGENCIA') router.push('/dashboard');
+      else if (rol === 'AGENCY') router.push('/dashboard');
       else router.push('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
