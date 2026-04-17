@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/lib/axiosClient';
 
 const TERMINOS = `TÉRMINOS Y CONDICIONES — GRADUTECH PRO
 
@@ -61,7 +62,7 @@ export default function RegistroAgencia() {
   setCargando(true);
   setError('');
   try {
-    const res = await axios.post('https://darksiders.shop/api/auth/registro', {
+    const res = await axiosClient.post('/auth/registro', {
       nombre: form.nombre,
       email: form.email,
       password: form.password,
@@ -69,13 +70,13 @@ export default function RegistroAgencia() {
     });
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
-    await axios.post('https://darksiders.shop/api/agencias', {
+    await axiosClient.post('/agencias', {
       nombre: form.nombre,
       descripcion: form.descripcion,
     }, { headers: { Authorization: `Bearer ${res.data.token}` } });
     const planes = ['basico', 'pro', 'anual'];
     const plan = planes[planSeleccionado];
-    const resPago = await axios.post('https://darksiders.shop/api/pagos/suscripcion',
+    const resPago = await axiosClient.post('/pagos/suscripcion',
       { plan },
       { headers: { Authorization: `Bearer ${res.data.token}` } });
     window.location.href = resPago.data.url;

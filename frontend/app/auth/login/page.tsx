@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import axios from 'axios';
+import axiosClient from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
@@ -14,7 +14,7 @@ export default function Login() {
     setCargando(true);
     setError('');
     try {
-      const res = await axios.post('https://darksiders.shop/api/auth/login', form);
+      const res = await axiosClient.post('/auth/login', form);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
       const rol = res.data.usuario.rol;
