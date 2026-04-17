@@ -71,11 +71,14 @@ axiosClient.interceptors.response.use(
   (error: AxiosError) => {
     // Error de autenticación: token expirado o inválido
     if (error.response?.status === 401) {
-      // Limpiar localStorage
-      if (typeof window !== 'undefined') {
+      console.warn('401 detectado - token inválido o expirado');
+
+      // 🔥 SOLO limpiar si NO estás en login
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/login')) {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
-        // Redirigir a login (opcional, puede manejarse en el componente)
+        localStorage.removeItem('rol');
+
         window.location.href = '/auth/login';
       }
     }

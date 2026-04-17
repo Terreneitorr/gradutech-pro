@@ -9,39 +9,51 @@ export default function Login() {
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setCargando(true);
   setError('');
 
   try {
-    const res = await axiosClient.post('/auth/login', form);
+  const res = await axiosClient.post('/auth/login', form);
 
-    console.log("RESPUESTA LOGIN:", res.data); // 👈 IMPORTANTE
+  console.log("RESPUESTA LOGIN:", res.data);
 
-    localStorage.setItem('token', res.data.token);
+  // 🔥 TOKEN
+  const token = res.data.token || res.data.accessToken;
 
-    // 🔥 Detectar correctamente el usuario
-    const usuario = res.data.usuario || res.data.user;
-    localStorage.setItem('usuario', JSON.stringify(usuario));
+  if (!token) {
+    throw new Error('No se recibió token');
+  }
 
-    // 🔥 Detectar rol correctamente (rol o role)
-      const rol = (usuario?.rol || usuario?.role || '').toUpperCase();
+  localStorage.setItem('token', token);
 
-      localStorage.setItem('rol', rol);
+  // 🔥 USUARIO
+  const usuario = res.data.usuario || res.data.user;
+  localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      if (rol === 'ADMIN') {
-        router.push('/admin');
-      } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
-        router.push('/agencia/bienvenida');
-      } else {
-        router.push('/');
-      }
+  // 🔥 ROL
+  const rolRaw = usuario?.rol || usuario?.role || '';
+  const rol = rolRaw.toString().toUpperCase().trim();
+
+  localStorage.setItem('rol', rol);
+
+  // 🔥 👇 AQUÍ VAN LOS LOGS 👇
+  console.log("TOKEN:", token);
+  console.log("USUARIO:", usuario);
+  console.log("ROL FINAL:", rol);
+
+  // 🔥 REDIRECCIÓN
+  if (rol === 'ADMIN') {
+    router.push('/admin');
+  } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
+    router.push('/agencia/bienvenida');
+  } else {
+    router.push('/');
+  }
 
   } catch (err: any) {
     setError(err.response?.data?.error || 'Error al iniciar sesión');
-  } finally {
-    setCargando(false);
   }
 };
 
