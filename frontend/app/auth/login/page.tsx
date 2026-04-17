@@ -9,28 +9,45 @@ export default function Login() {
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCargando(true);
-    setError('');
-    try {
-      const res = await axiosClient.post('/auth/login', form);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
-      const rol = res.data.usuario.rol?.toUpperCase();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setCargando(true);
+  setError('');
 
-      // GUARDAR EL ROL
-      localStorage.setItem('rol', rol);
+  try {
+    const res = await axiosClient.post('/auth/login', form);
 
-      if (rol === 'ADMIN') router.push('/admin');
-      else if (rol === 'AGENCY') router.push('/agency/dashboard');
-      else router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
-    } finally {
-      setCargando(false);
+    console.log("RESPUESTA LOGIN:", res.data); // 👈 IMPORTANTE
+
+    localStorage.setItem('token', res.data.token);
+
+    // 🔥 Detectar correctamente el usuario
+    const usuario = res.data.usuario || res.data.user;
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+
+    // 🔥 Detectar rol correctamente (rol o role)
+    const rol = (usuario?.rol || usuario?.role || '').toUpperCase();
+
+    console.log("ROL DETECTADO:", rol); // 👈 VER ESTO EN CONSOLA
+
+    // Guardar rol
+    localStorage.setItem('rol', rol);
+
+    // 🔥 Redirección correcta
+    if (rol === 'ADMIN') {
+      router.push('/admin');
+    } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
+      router.push('/agency/dashboard');
+    } else {
+      router.push('/');
     }
-  };
+
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Error al iniciar sesión');
+  } finally {
+    setCargando(false);
+  }
+};
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4" style={{background:'#0f0c29'}}>
