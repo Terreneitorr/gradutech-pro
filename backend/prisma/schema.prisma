@@ -9,26 +9,37 @@ datasource db {
 
 // Modelo Usuario: Representa a los usuarios del sistema, incluyendo clientes y administradores de agencias.
 // Sirve para gestionar la autenticación y autorización de usuarios en la plataforma.
-// Relaciones: Tiene una relación uno a muchos con Pedido (un usuario puede tener múltiples pedidos).
+// Restricciones de dominio:
+//   - nombre: máximo 100 caracteres
+//   - email: único y máximo 255 caracteres
+//   - password: máximo 255 caracteres (almacenado como hash bcrypt)
+//   - rol: solo puede ser USUARIO, AGENCIA o ADMIN (enum)
+// Relaciones: Tiene una relación uno a muchos con Pedido.
 model Usuario {
   id        String   @id @default(uuid())
-  nombre    String
-  email     String   @unique
-  password  String
+  nombre    String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
   rol       Rol      @default(USUARIO)
   createdAt DateTime @default(now())
   pedidos   Pedido[]
 }
 
-// Modelo Agencia: Representa a las agencias fotográficas que ofrecen servicios de producción de cuadros escolares.
-// Sirve para organizar y gestionar las agencias registradas en el sistema, incluyendo su configuración y productos.
-// Relaciones: Tiene una relación uno a muchos con Paquete, Pedido, FechaDisponible y ModeloCuadro (una agencia puede tener múltiples paquetes, pedidos, fechas disponibles y modelos de cuadros).
+// Modelo Agencia: Representa a las agencias fotográficas registradas en la plataforma.
+// Restricciones de dominio:
+//   - nombre: máximo 150 caracteres
+//   - slug: único y máximo 150 caracteres (identificador en URL)
+//   - descripcion: opcional, máximo 500 caracteres
+//   - activa: false por defecto — requiere activación manual por admin
+//   - suscripcion: false por defecto — requiere pago para activarse
+// Relaciones: uno a muchos con Paquete, Pedido, FechaDisponible y ModeloCuadro.
+//   onDelete: Cascade — si se elimina la agencia, se eliminan sus datos relacionados.
 model Agencia {
   id          String            @id @default(uuid())
-  nombre      String
-  slug        String            @unique
-  descripcion String?
-  logo        String?
+  nombre      String            @db.VarChar(150)
+  slug        String            @unique @db.VarChar(150)
+  descripcion String?           @db.VarChar(500)
+  logo        String?           @db.VarChar(500)
   activa      Boolean           @default(false)
   suscripcion Boolean           @default(false)
   usuarioId   String?
@@ -39,30 +50,39 @@ model Agencia {
   modelos     ModeloCuadro[]
 }
 
-// Modelo Paquete: Representa los paquetes de productos ofrecidos por las agencias, como diferentes tipos de cuadros escolares.
-// Sirve para definir los productos disponibles para la venta, incluyendo nombre, descripción y precio.
-// Relaciones: Pertenece a una Agencia (muchos a uno) y tiene una relación uno a muchos con Pedido (un paquete puede estar en múltiples pedidos).
+// Modelo Paquete: Productos ofrecidos por las agencias.
+// Restricciones de dominio:
+//   - nombre: máximo 150 caracteres
+//   - descripcion: opcional, máximo 500 caracteres
+//   - precio: número decimal positivo (validado en backend)
+// Relaciones: pertenece a Agencia, tiene muchos Pedidos.
+//   onDelete: Cascade — si se elimina la agencia, sus paquetes se eliminan también.
 model Paquete {
   id          String   @id @default(uuid())
-  nombre      String
-  descripcion String?
+  nombre      String   @db.VarChar(150)
+  descripcion String?  @db.VarChar(500)
   precio      Float
   agenciaId   String
-  agencia     Agencia  @relation(fields: [agenciaId], references: [id])
+  agencia     Agencia  @relation(fields: [agenciaId], references: [id], onDelete: Cascade)
   pedidos     Pedido[]
 }
 
-// Modelo Pedido: Representa los pedidos realizados por los usuarios para adquirir productos de las agencias.
-// Sirve para gestionar el proceso de compra, desde la solicitud hasta la entrega, incluyendo estado y pagos.
-// Relaciones: Pertenece a un Usuario (muchos a uno), una Agencia (muchos a uno) y un Paquete (muchos a uno).
+// Modelo Pedido: Pedidos realizados por usuarios a agencias.
+// Restricciones de dominio:
+//   - escuela: máximo 200 caracteres
+//   - grado: máximo 100 caracteres
+//   - leyenda: máximo 300 caracteres
+//   - estado: solo puede ser PENDIENTE, CONFIRMADO, EN_PRODUCCION, LISTO o ENTREGADO (enum)
+//   - anticipoPagado: false por defecto
+// Relaciones: pertenece a Usuario, Agencia y Paquete.
 model Pedido {
   id             String       @id @default(uuid())
   usuarioId      String
   agenciaId      String
   paqueteId      String
-  escuela        String
-  grado          String
-  leyenda        String
+  escuela        String       @db.VarChar(200)
+  grado          String       @db.VarChar(100)
+  leyenda        String       @db.VarChar(300)
   estado         EstadoPedido @default(PENDIENTE)
   totalPago      Float
   anticipoPagado Boolean      @default(false)
@@ -72,48 +92,69 @@ model Pedido {
   paquete        Paquete      @relation(fields: [paqueteId], references: [id])
 }
 
-// Modelo FechaDisponible: Representa las fechas disponibles para sesiones fotográficas o entregas por parte de las agencias.
-// Sirve para gestionar la disponibilidad de horarios y cupos para servicios ofrecidos por las agencias.
-// Relaciones: Pertenece a una Agencia (muchos a uno).
+// Modelo FechaDisponible: Fechas para sesiones fotográficas por agencia.
+// Restricciones de dominio:
+//   - cupos: número entero positivo (validado en backend)
+//   - fecha: tipo DateTime con zona horaria
+// Relaciones: pertenece a Agencia.
+//   onDelete: Cascade — si se elimina la agencia, sus fechas se eliminan también.
 model FechaDisponible {
   id        String   @id @default(uuid())
   agenciaId String
   fecha     DateTime
   cupos     Int
-  agencia   Agencia  @relation(fields: [agenciaId], references: [id])
+  agencia   Agencia  @relation(fields: [agenciaId], references: [id], onDelete: Cascade)
 }
 
-// Modelo Publicidad: Representa los anuncios publicitarios de empresas externas en la plataforma.
-// Sirve para gestionar la publicidad mostrada en el sistema, incluyendo imágenes y enlaces.
-// Relaciones: No tiene relaciones directas con otras tablas; es independiente.
+// Modelo Publicidad: Anuncios de empresas externas en la plataforma.
+// Restricciones de dominio:
+//   - empresa: máximo 150 caracteres
+//   - imagen: URL opcional, máximo 500 caracteres
+//   - link: URL opcional, máximo 500 caracteres
+//   - activa: false por defecto
+// Relaciones: ninguna (tabla independiente).
 model Publicidad {
   id        String   @id @default(uuid())
-  empresa   String
-  imagen    String?
-  link      String?
+  empresa   String   @db.VarChar(150)
+  imagen    String?  @db.VarChar(500)
+  link      String?  @db.VarChar(500)
   activa    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
-// Modelo ModeloCuadro: Representa los modelos o plantillas de cuadros disponibles para las agencias, como marcos, fondos y diseños.
-// Sirve para definir los elementos visuales que las agencias pueden usar en sus productos.
-// Relaciones: Pertenece a una Agencia (muchos a uno).
+// Modelo ModeloCuadro: Elementos visuales (marcos, fondos, diseños) para cuadros.
+// Restricciones de dominio:
+//   - nombre: máximo 150 caracteres
+//   - tipo: solo puede ser MARCO, FONDO o DISENO (enum)
+//   - imagen: URL requerida, máximo 500 caracteres
+// Relaciones: pertenece a Agencia.
+//   onDelete: Cascade — si se elimina la agencia, sus modelos se eliminan también.
 model ModeloCuadro {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   agenciaId   String
-  nombre      String
+  nombre      String     @db.VarChar(150)
   tipo        TipoCuadro
-  imagen      String
-  createdAt   DateTime @default(now())
-  agencia     Agencia  @relation(fields: [agenciaId], references: [id])
+  imagen      String     @db.VarChar(500)
+  createdAt   DateTime   @default(now())
+  agencia     Agencia    @relation(fields: [agenciaId], references: [id], onDelete: Cascade)
 }
 
+// Enum Rol: Define los roles posibles de un usuario en el sistema.
+// USUARIO  → estudiante que ordena fotografías
+// AGENCIA  → empresa fotográfica que ofrece servicios
+// ADMIN    → administrador de la plataforma (solo se asigna manualmente en BD)
 enum Rol {
   USUARIO
   AGENCIA
   ADMIN
 }
 
+// Enum EstadoPedido: Define el ciclo de vida de un pedido.
+// PENDIENTE     → recién creado, sin confirmar
+// CONFIRMADO    → agencia confirmó el pedido
+// EN_PRODUCCION → cuadro en proceso de fabricación
+// LISTO         → cuadro terminado, listo para entrega
+// ENTREGADO     → entregado al cliente
 enum EstadoPedido {
   PENDIENTE
   CONFIRMADO
@@ -122,6 +163,10 @@ enum EstadoPedido {
   ENTREGADO
 }
 
+// Enum TipoCuadro: Clasifica los modelos visuales disponibles para el cuadro.
+// MARCO  → el borde del cuadro
+// FONDO  → el fondo de la fotografía
+// DISENO → diseño decorativo adicional
 enum TipoCuadro {
   MARCO
   FONDO
