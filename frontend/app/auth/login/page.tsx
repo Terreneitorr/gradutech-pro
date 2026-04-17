@@ -18,8 +18,12 @@ export default function Login() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
       const rol = res.data.usuario.rol?.toUpperCase();
+
+      // GUARDAR EL ROL
+      localStorage.setItem('rol', rol);
+
       if (rol === 'ADMIN') router.push('/admin');
-      else if (rol === 'AGENCY') router.push('/dashboard');
+      else if (rol === 'AGENCY') router.push('/agency/dashboard');
       else router.push('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
