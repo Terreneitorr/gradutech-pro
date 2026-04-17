@@ -26,21 +26,17 @@ const handleSubmit = async (e: React.FormEvent) => {
     localStorage.setItem('usuario', JSON.stringify(usuario));
 
     // 🔥 Detectar rol correctamente (rol o role)
-    const rol = (usuario?.rol || usuario?.role || '').toUpperCase();
+      const rol = (usuario?.rol || usuario?.role || '').toUpperCase();
 
-    console.log("ROL DETECTADO:", rol); // 👈 VER ESTO EN CONSOLA
+      localStorage.setItem('rol', rol);
 
-    // Guardar rol
-    localStorage.setItem('rol', rol);
-
-    // 🔥 Redirección correcta
-    if (rol === 'ADMIN') {
-      router.push('/admin');
-    } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
-      router.push('/agency/dashboard');
-    } else {
-      router.push('/');
-    }
+      if (rol === 'ADMIN') {
+        router.push('/admin');
+      } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
+        router.push('/agencia/bienvenida');
+      } else {
+        router.push('/');
+      }
 
   } catch (err: any) {
     setError(err.response?.data?.error || 'Error al iniciar sesión');
