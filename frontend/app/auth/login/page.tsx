@@ -1,7 +1,22 @@
 'use client';
+
 import { useState } from 'react';
 import axiosClient from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
+import { AxiosError } from 'axios';
+
+interface LoginResponse {
+  token?: string;
+  accessToken?: string;
+  usuario?: {
+    rol?: string;
+    role?: string;
+  };
+  user?: {
+    rol?: string;
+    role?: string;
+  };
+}
 
 export default function Login() {
   const router = useRouter();
@@ -9,27 +24,42 @@ export default function Login() {
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setCargando(true);
-  setError('');
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setCargando(true);
+    setError('');
 
-  try {
-    const res = await axiosClient.post('/auth/login', form);
+    try {
+      const res = await axiosClient.post<LoginResponse>('/auth/login', form);
 
-    console.log("RESPUESTA LOGIN:", res.data); // 👈 IMPORTANTE
+      console.log("LOGIN RESPONSE:", res.data);
 
-    localStorage.setItem('token', res.data.token);
+      // ✅ TOKEN seguro
+      const token = res.data.token || res.data.accessToken;
 
-    // 🔥 Detectar correctamente el usuario
-    const usuario = res.data.usuario || res.data.user;
-    localStorage.setItem('usuario', JSON.stringify(usuario));
+      if (!token) {
+        throw new Error('No se recibió token');
+      }
 
-    // 🔥 Detectar rol correctamente (rol o role)
-      const rol = (usuario?.rol || usuario?.role || '').toUpperCase();
+      localStorage.setItem('token', token);
+
+      // ✅ USUARIO seguro
+      const usuario = res.data.usuario || res.data.user;
+
+      if (!usuario) {
+        throw new Error('No se recibió usuario');
+      }
+
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+
+      // ✅ ROL seguro
+      const rol = (usuario.rol || usuario.role || '').toUpperCase();
 
       localStorage.setItem('rol', rol);
 
+      console.log("ROL:", rol);
+
+      // ✅ REDIRECCIÓN
       if (rol === 'ADMIN') {
         router.push('/admin');
       } else if (rol === 'AGENCY' || rol === 'AGENCIA') {
@@ -38,73 +68,46 @@ const handleSubmit = async (e: React.FormEvent) => {
         router.push('/');
       }
 
-  } catch (err: any) {
-    setError(err.response?.data?.error || 'Error al iniciar sesión');
-  } finally {
-    setCargando(false);
-  }
-};
+    } catch (error) {
+      const err = error as AxiosError<any>;
+
+      console.error(err);
+
+      setError(
+        err.response?.data?.error ||
+        err.message ||
+        'Error al iniciar sesión'
+      );
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4" style={{background:'#0f0c29'}}>
-      <div style={{position:'absolute', top:'20%', left:'30%', width:400, height:400, borderRadius:'50%', background:'rgba(240,147,251,0.1)', filter:'blur(80px)'}}/>
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div style={{width:40, height:40, background:'linear-gradient(135deg, #f093fb, #f5576c)', borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center'}}>
-              <span className="text-white font-bold text-xl">G</span>
-            </div>
-            <span className="text-white font-bold text-2xl">GraduTech <span style={{color:'#f093fb'}}>Pro</span></span>
-          </div>
-          <h1 className="text-3xl font-bold text-white">Bienvenido de vuelta</h1>
-          <p className="mt-2" style={{color:'rgba(255,255,255,0.5)'}}>Inicia sesión en tu cuenta</p>
-        </div>
 
-        <div className="rounded-2xl p-8" style={{background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)'}}>
-          {error && (
-            <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{background:'rgba(245,87,108,0.2)', color:'#f5576c', border:'1px solid rgba(245,87,108,0.3)'}}>
-              {error}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{color:'rgba(255,255,255,0.7)'}}>Correo electrónico</label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={e => setForm({...form, email: e.target.value})}
-                placeholder="tu@correo.com"
-                className="w-full px-4 py-3 rounded-xl outline-none transition-all"
-                style={{background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)', color:'white'}}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{color:'rgba(255,255,255,0.7)'}}>Contraseña</label>
-              <input
-                type="password"
-                required
-                value={form.password}
-                onChange={e => setForm({...form, password: e.target.value})}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl outline-none transition-all"
-                style={{background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)', color:'white'}}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={cargando}
-              className="w-full py-3 rounded-xl font-bold text-white transition-all"
-              style={{background:'linear-gradient(135deg, #f093fb, #f5576c)', opacity: cargando ? 0.7 : 1}}
-            >
-              {cargando ? 'Iniciando sesión...' : 'Iniciar sesión'}
-            </button>
-          </form>
-          <p className="text-center mt-6 text-sm" style={{color:'rgba(255,255,255,0.4)'}}>
-            ¿No tienes cuenta?{' '}
-            <a href="/auth/registro" style={{color:'#f093fb'}} className="font-medium">Regístrate aquí</a>
-          </p>
-        </div>
+        {error && <p style={{color:'red'}}>{error}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Correo"
+            value={form.email}
+            onChange={e => setForm({...form, email: e.target.value})}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={e => setForm({...form, password: e.target.value})}
+          />
+
+          <button type="submit" disabled={cargando}>
+            {cargando ? 'Cargando...' : 'Login'}
+          </button>
+        </form>
       </div>
     </main>
   );
